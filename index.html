@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【港鐵 CA 模擬考】考前 AI 陪練室</title>
+    <title>【港鐵 CA 模擬考】考前 AI 陪練室 (嚴格教練版)</title>
     <style>
         :root { --primary: #047857; --secondary: #b45309; --bg: #f0fdf4; --white: #ffffff; --text: #334155; }
         body { font-family: 'Microsoft YaHei', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); line-height: 1.6; }
@@ -15,7 +15,7 @@
         h2 { color: var(--secondary); border-bottom: 2px solid #fde68a; padding-bottom: 10px; margin-top: 0; }
         
         select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
-        textarea { resize: vertical; min-height: 150px; }
+        textarea { resize: vertical; min-height: 200px; }
         textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(4, 120, 87, 0.2); }
         
         .word-count { font-weight: bold; color: #047857; margin-top: 5px; display: inline-block; }
@@ -28,8 +28,8 @@
         .btn-attack { background-color: #b91c1c; }
         .btn-attack:hover { background-color: #991b1b; }
         
-        .feedback-box { background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px dashed #cbd5e1; margin-top: 15px; display: none; }
-        .feedback-box h3 { margin-top: 0; color: #047857; }
+        .feedback-box { background: #f8fafc; padding: 20px; border-radius: 8px; border: 2px dashed #94a3b8; margin-top: 15px; display: none; }
+        .feedback-box h3 { margin-top: 0; color: #047857; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;}
         .loading { display: none; color: #047857; font-weight: bold; margin-top: 10px; text-align: center;}
     </style>
 </head>
@@ -37,8 +37,8 @@
 
 <div class="container">
     <div class="header">
-        <h1>🚇 【港鐵 CA 考試】AI 考前陪練室</h1>
-        <p>1.5 分鐘首輪發言診斷 ＆ 8 分鐘自由討論防守特訓</p>
+        <h1>🚇 【港鐵 CA 考試】AI 嚴格教練陪練室</h1>
+        <p>拒絕死背！透過引導式反思，打磨你的專屬高分講稿</p>
     </div>
 
     <div class="section">
@@ -62,20 +62,22 @@
         <h2>⏱️ 第一關：1.5 分鐘首輪發言講稿測試</h2>
         <p style="font-size: 0.9em; color: #475569;">請輸入你的發言稿。1.5 分鐘的建議字數為 <strong>250 - 350 字</strong>。注意：必須包含景點特色、交通配套、行程配合、以及廣州地鐵專家的背景喜好！</p>
         
-        <textarea id="draftInput" placeholder="各位同事好，針對第四天的行程，我建議安排廣州專家前往..." oninput="countWords()"></textarea>
-        <div>
-            目前字數：<span id="wordCounter" class="word-count">0</span> 字
-            <span id="wordWarning" class="word-count warning" style="display:none; margin-left: 10px;">(⚠️ 字數可能太少或超時，請調整！)</span>
-        </div>
-        
         <div class="grid-2col">
-            <button class="btn-check" onclick="checkScript()">🔍 1. 請 AI 批改四大得分點</button>
-            <button class="btn-check btn-attack" onclick="generateAttacks()">⚔️ 2. 請 AI 扮演同學攻擊我的提案</button>
+            <div>
+                <textarea id="draftInput" placeholder="各位同事好，針對第四天的行程，我建議安排廣州專家前往... (寫完後點擊右側按鈕進行診斷，並根據教練的提問不斷修改此處的文字)" oninput="countWords()"></textarea>
+                <div>
+                    目前字數：<span id="wordCounter" class="word-count">0</span> 字
+                    <span id="wordWarning" class="word-count warning" style="display:none; margin-left: 10px;">(⚠️ 字數可能太少或超時！)</span>
+                </div>
+            </div>
+            
+            <div>
+                <button class="btn-check" onclick="checkScript()">🔍 1. 提交教練診斷 (檢查四大得分點)</button>
+                <button class="btn-check btn-attack" onclick="generateAttacks()">⚔️ 2. 請教練扮演同學攻擊我的提案</button>
+                <div id="loading" class="loading">⏳ 教練正在審視你的講稿邏輯，請稍候...</div>
+                <div id="feedbackResult" class="feedback-box"></div>
+            </div>
         </div>
-
-        <div id="loading" class="loading">⏳ 系統正在連線中，請稍候...</div>
-        
-        <div id="feedbackResult" class="feedback-box"></div>
     </div>
 </div>
 
@@ -87,7 +89,6 @@
         const warning = document.getElementById('wordWarning');
         
         counter.innerText = count;
-        
         if(count > 0 && (count < 200 || count > 400)) {
             warning.style.display = 'inline-block';
         } else {
@@ -127,7 +128,7 @@
             feedbackBox.style.display = 'block';
 
         } catch (error) {
-            feedbackBox.innerHTML = `<p style="color:red;">❌ 錯誤：無法連線到伺服器。</p><p>請確認您的 Google Apps Script 網址是否正確，且已設定為「所有人」可存取。詳細錯誤：${error.message}</p>`;
+            feedbackBox.innerHTML = `<p style="color:red;">❌ 錯誤：無法連線到伺服器。</p><p>請確認您的 Google Apps Script 網址是否正確。詳細錯誤：${error.message}</p>`;
             feedbackBox.style.display = 'block';
         } finally {
             loading.style.display = 'none';
@@ -135,18 +136,18 @@
     }
 
     function checkScript() {
-        const prompt = `你是一位嚴格的香港大專普通話講師。學生正在準備「港鐵接待廣州地鐵專家」的 CA 考試首輪發言稿。
-請嚴格檢視學生的講稿是否包含以下四個「得分關鍵」：
-1. 景點特色及獨特之處
-2. 交通配套 (例如搭乘港鐵或高鐵的便利性)
-3. 行程配合 (前三天是密集的車廠/系統考察，第四天適合這個景點嗎？)
-4. 來賓背景 (廣州地鐵專家的喜好與文化背景)
+        const prompt = `你是一位嚴厲且善於啟發學生的香港大專普通話教練。學生正在準備「港鐵接待廣州地鐵專家」的 CA 考試。
+你需要檢視學生的講稿是否滿足四個 CA 考試得分關鍵：1. 景點特色 2. 交通配套 3. 行程配合 4. 來賓背景。
+
+【最高指導原則 - 絕對禁止餵答案】：
+你不可以幫學生寫出完整的建議台詞！絕不能出現讓學生可以直接複製的句子！你只能透過「提問」來引導他們自己去查資料或思考。
 
 請輸出 HTML 格式的報告（不含 markdown 標記）：
-<h3>📊 發言稿診斷報告</h3>
-<p><strong>✅ 做得好的地方：</strong>...</p>
-<p><strong>❌ 缺失的得分點：</strong>[明確指出上面4點哪裡沒提到，或哪裡寫得像背書]</p>
-<p><strong>💡 建議加入的台詞：</strong>[給予一句能補足上述缺失的得體台詞示範]</p>`;
+<h3>📊 講稿診斷報告</h3>
+<p style="font-size:1.2em; font-weight:bold; color:#047857;">目前的得分點達成率： [X]/4</p>
+<p><strong>✅ 你已經做到的：</strong><br>[簡述他們寫得好的、有得分的部分]</p>
+<p style="color:#b91c1c;"><strong>❌ 缺失的得分點與思考引導：</strong><br>[針對缺失的部分，提出 1 到 2 個具體的「引導式問題」。例如：如果你發現他沒寫交通，請問他「專家們住在九龍香格里拉，他們要怎麼搭地鐵去你說的地方？」強迫學生自己思考並修改，絕對不要給答案！]</p>
+<p style="font-size:0.9em; color:#475569; margin-top:15px;">👉 教練指示：請根據上述問題，在左側的輸入框中補充你的資料，然後再次點擊診斷，直到拿下 4/4 滿分為止！</p>`;
         
         callDeepSeek(prompt);
     }
@@ -155,16 +156,18 @@
         const prompt = `學生即將進行 CA 考試的 8 分鐘自由討論。他的任務是向其他同事推銷他所選的景點，給廣州地鐵專家參觀。
 請你扮演其他「不贊同這個提案」的港鐵同事。請根據該景點的劣勢、交通距離、或是「不適合廣州地鐵專家」的角度，提出 2 個犀利、合理且刁鑽的反駁問題，讓學生預先準備防守。
 
+【絕對禁止餵答案】：不要告訴學生該怎麼回答這些問題，只要負責扮演提出質疑的壞同事即可。
+
 請輸出 HTML 格式（不含 markdown 標記）：
 <h3 style="color:#b91c1c;">⚔️ 自由討論假想敵來襲！</h3>
 <p style="color:#475569;">在 8 分鐘的自由討論中，其他同學很可能會這樣攻擊你的提案：</p>
 <div style="background:#fee2e2; padding:10px; border-radius:5px; margin-bottom:10px;">
-    <strong>同事 A 的質疑：</strong><br>[提出第一個刁鑽問題，例如針對距離、疲勞度或景點重複性]
+    <strong>同事 A 的犀利質疑：</strong><br>[提出第一個刁鑽問題，例如針對距離、疲勞度或景點重複性]
 </div>
 <div style="background:#fee2e2; padding:10px; border-radius:5px;">
-    <strong>同事 B 的質疑：</strong><br>[提出第二個刁鑽問題，例如針對專家背景或交通配套]
+    <strong>同事 B 的犀利質疑：</strong><br>[提出第二個刁鑽問題，例如針對專家背景或交通配套]
 </div>
-<p style="margin-top:15px; font-weight:bold; color:#b45309;">👉 考前作業：請你自己思考，如果遇到這兩個問題，你要如何運用「委婉反對」與「協調」技巧來反擊或退讓？</p>`;
+<p style="margin-top:15px; font-weight:bold; color:#b45309;">👉 考前實戰作業：請你自己思考，如果遇到這兩個問題，你要如何運用「委婉反對」與「協調」技巧來反擊或退讓？</p>`;
         
         callDeepSeek(prompt);
     }
