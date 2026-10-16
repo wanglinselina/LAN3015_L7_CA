@@ -73,7 +73,7 @@
             <button class="btn-check btn-attack" onclick="generateAttacks()">⚔️ 2. 請 AI 扮演同學攻擊我的提案</button>
         </div>
 
-        <div id="loading" class="loading">⏳ 系統正在思考中，請稍候...</div>
+        <div id="loading" class="loading">⏳ 系統正在連線中，請稍候...</div>
         
         <div id="feedbackResult" class="feedback-box"></div>
     </div>
@@ -116,18 +116,18 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({
                     systemPrompt: systemPrompt,
-                    userPrompt: \`我推薦的景點是：\${spot}\\n我的講稿：\\n\${draft}\`
+                    userPrompt: `我推薦的景點是：${spot}\n我的講稿：\n${draft}`
                 })
             });
 
             const data = await response.json();
             if (data.error) throw new Error(data.error.message);
             
-            feedbackBox.innerHTML = data.choices[0].message.content.replace(/\`\`\`html|\`\`\`/g, '');
+            feedbackBox.innerHTML = data.choices[0].message.content.replace(/```html|```/g, '');
             feedbackBox.style.display = 'block';
 
         } catch (error) {
-            feedbackBox.innerHTML = \`<p style="color:red;">❌ 錯誤：\${error.message}</p><p>請聯絡老師確認系統狀態。</p>\`;
+            feedbackBox.innerHTML = `<p style="color:red;">❌ 錯誤：無法連線到伺服器。</p><p>請確認您的 Google Apps Script 網址是否正確，且已設定為「所有人」可存取。詳細錯誤：${error.message}</p>`;
             feedbackBox.style.display = 'block';
         } finally {
             loading.style.display = 'none';
@@ -135,7 +135,7 @@
     }
 
     function checkScript() {
-        const prompt = \`你是一位嚴格的香港大專普通話講師。學生正在準備「港鐵接待廣州地鐵專家」的 CA 考試首輪發言稿。
+        const prompt = `你是一位嚴格的香港大專普通話講師。學生正在準備「港鐵接待廣州地鐵專家」的 CA 考試首輪發言稿。
 請嚴格檢視學生的講稿是否包含以下四個「得分關鍵」：
 1. 景點特色及獨特之處
 2. 交通配套 (例如搭乘港鐵或高鐵的便利性)
@@ -146,13 +146,13 @@
 <h3>📊 發言稿診斷報告</h3>
 <p><strong>✅ 做得好的地方：</strong>...</p>
 <p><strong>❌ 缺失的得分點：</strong>[明確指出上面4點哪裡沒提到，或哪裡寫得像背書]</p>
-<p><strong>💡 建議加入的台詞：</strong>[給予一句能補足上述缺失的得體台詞示範]</p>\`;
+<p><strong>💡 建議加入的台詞：</strong>[給予一句能補足上述缺失的得體台詞示範]</p>`;
         
         callDeepSeek(prompt);
     }
 
     function generateAttacks() {
-        const prompt = \`學生即將進行 CA 考試的 8 分鐘自由討論。他的任務是向其他同事推銷他所選的景點，給廣州地鐵專家參觀。
+        const prompt = `學生即將進行 CA 考試的 8 分鐘自由討論。他的任務是向其他同事推銷他所選的景點，給廣州地鐵專家參觀。
 請你扮演其他「不贊同這個提案」的港鐵同事。請根據該景點的劣勢、交通距離、或是「不適合廣州地鐵專家」的角度，提出 2 個犀利、合理且刁鑽的反駁問題，讓學生預先準備防守。
 
 請輸出 HTML 格式（不含 markdown 標記）：
@@ -164,7 +164,7 @@
 <div style="background:#fee2e2; padding:10px; border-radius:5px;">
     <strong>同事 B 的質疑：</strong><br>[提出第二個刁鑽問題，例如針對專家背景或交通配套]
 </div>
-<p style="margin-top:15px; font-weight:bold; color:#b45309;">👉 考前作業：請你自己思考，如果遇到這兩個問題，你要如何運用「委婉反對」與「協調」技巧來反擊或退讓？</p>\`;
+<p style="margin-top:15px; font-weight:bold; color:#b45309;">👉 考前作業：請你自己思考，如果遇到這兩個問題，你要如何運用「委婉反對」與「協調」技巧來反擊或退讓？</p>`;
         
         callDeepSeek(prompt);
     }
